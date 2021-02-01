@@ -4,6 +4,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 require('dotenv').config();
+var fs = require("fs");
 //------------------------------
 // WELCOME SHIZZLE
 //------------------------------
@@ -69,6 +70,7 @@ client.on('message', async (message) => {
       	message.channel.send(valueToUse);
     }
 });
+/* 
 //-------------------------------------
 // COUNTER
 //-------------------------------------
@@ -104,6 +106,56 @@ client.on("message", message => {
         }
     }
 });
+*/
+//-------------------------------------
+//counter 2
+//-------------------------------------
+
+var data = 0;
+fs.readFile("count.txt", "utf-8", function(err, buf) {
+    console.log(buf);
+    data = buf;
+    data = Number(data);
+});
+var pinger = 'bot';
+
+client.on("message", message => {
+    if(!isNaN(message.content)){
+        if (message.channel.id == "804378504300200016") {
+            console.log(pinger)
+            fs.readFile("count.txt", "utf-8", function(err, buf) {
+                data = buf;
+                data = Number(data);
+            });
+                if(message.content == data + 1 ){
+                    if(pinger == message.author){
+                        message.react('⚠️');
+                        message.reply(`Chappie, niet nog een keer. Volgend nummer is 1`);
+                        fs.writeFile("count.txt", '0', (err) => {
+                            if (err) console.log(err);
+                        });
+                    }
+                    else{
+                    data = data + 1;
+                        message.react('✅');
+                        pinger = message.author;
+                        fs.writeFile("count.txt", data.toString(), (err) => {
+                            if (err) console.log(err);
+                        });
+                    }
+                }
+                else{
+                message.react('⚠️');
+                message.reply(`Chappie, verkeerd nummer. Het moest ${data + 1} zijn. Volgend nummer is 1.`);
+                fs.writeFile("count.txt", '0', (err) => {
+                    if (err) console.log(err);
+                });
+        
+            }
+        }
+    }
+});
+
 //-------------------------------------
 // AMONG US
 //-------------------------------------
@@ -219,4 +271,4 @@ client.on('ready', () => {
 //-------------------------------------
 // TOKEN
 //-------------------------------------
-client.login(process.env.token);
+client.login("ODA1NzYzMDgwNDI0MzkwNjY2.YBfnWA.a6spBxmEjUFV3Wa0RM4nGuJ3Vh4");
