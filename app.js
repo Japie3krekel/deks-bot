@@ -4,7 +4,8 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 require('dotenv').config();
-var fs = require("fs");
+const ms = require('ms');
+const fs = require("fs");
 //------------------------------
 // WELCOME SHIZZLE
 //------------------------------
@@ -70,47 +71,9 @@ client.on('message', async (message) => {
       	message.channel.send(valueToUse);
     }
 });
-/* 
 //-------------------------------------
 // COUNTER
 //-------------------------------------
-var counter = [{
-    name: "bot",
-    nummer: 0
-}];
-client.on("message", message => {
-    if (message.channel.id == "804378504300200016") {
-        if(!isNaN(message.content)){
-            var counterlast = counter[counter.length - 1];
-            var countercheck = counterlast["nummer"] + 1;
-            var pinger = parseInt(message.content);
-            var lastuser = counterlast["name"];
-            if(countercheck === pinger && lastuser !== message.author.id){
-                counter.push({name: message.author.id, nummer: countercheck});
-                message.react('✅');
-            }
-            else{
-                if(lastuser === message.author.id){
-                    message.react('⚠️');
-                    message.reply(`Chappie, niet nog een keer. Volgend nummer is 1`);
-                    counter.length = 0;
-                    counter.push({name: "bot", nummer: 0});
-                }
-                else{
-                    message.react('⚠️');
-                    message.reply(`Chappie, verkeerd nummer. Het moest ${countercheck} zijn. Volgend nummer is 1.`);
-                    counter.length = 0;
-                    counter.push({name: "bot", nummer: 0});
-                }
-            }
-        }
-    }
-});
-*/
-//-------------------------------------
-//counter 2
-//-------------------------------------
-
 var data = 0;
 fs.readFile("count.txt", "utf-8", function(err, buf) {
     console.log(buf);
@@ -121,48 +84,44 @@ var pinger = 'bot';
 
 client.on("message", message => {
     if(!isNaN(message.content)){
-        if (message.channel.id == "804378504300200016") {
-            console.log(pinger)
-            fs.readFile("count.txt", "utf-8", function(err, buf) {
-                data = buf;
-                data = Number(data);
-            });
-                if(message.content == data + 1 ){
-                    if(pinger == message.author){
-                        message.react('⚠️');
-                        message.reply(`Chappie, niet nog een keer. Volgend nummer is 1`);
-                        fs.writeFile("count.txt", '0', (err) => {
-                            if (err) console.log(err);
-                        });
-                    }
-                    else{
-                    data = data + 1;
-                        message.react('✅');
-                        pinger = message.author;
-                        fs.writeFile("count.txt", data.toString(), (err) => {
-                            if (err) console.log(err);
-                        });
-                    }
+        console.log(pinger)
+        fs.readFile("count.txt", "utf-8", function(err, buf) {
+            data = buf;
+            data = Number(data);
+        });
+            if(message.content == data + 1 ){
+                if(pinger == message.author){
+                    message.react('⚠️');
+                    message.reply(`Chappie, niet nog een keer. Volgend nummer is 1`);
+                    fs.writeFile("count.txt", '0', (err) => {
+                        if (err) console.log(err);
+                    });
                 }
                 else{
-                message.react('⚠️');
-                message.reply(`Chappie, verkeerd nummer. Het moest ${data + 1} zijn. Volgend nummer is 1.`);
-                fs.writeFile("count.txt", '0', (err) => {
-                    if (err) console.log(err);
-                });
-        
+                data = data + 1;
+                    message.react('✅');
+                    pinger = message.author;
+                    fs.writeFile("count.txt", data.toString(), (err) => {
+                        if (err) console.log(err);
+                    });
+                }
             }
+            else{
+            message.react('⚠️');
+            message.reply(`Chappie, verkeerd nummer. Het moest ${data + 1} zijn. Volgend nummer is 1.`);
+            fs.writeFile("count.txt", '0', (err) => {
+                if (err) console.log(err);
+            });
         }
     }
 });
-
 //-------------------------------------
 // AMONG US
 //-------------------------------------
-client.on('message', (message) => {
+/*client.on('message', (message) => {
     if(message.member.roles.cache.find(r => r.name === "Hosts")) {
-        const shouldMute = (messageContent) => ['/mute'].includes(messageContent);
-        const shouldUnMute = (messageContent) => ['/unmute'].includes(messageContent);
+        const shouldMute = (messageContent) => ['/aumute'].includes(messageContent);
+        const shouldUnMute = (messageContent) => ['/auunmute'].includes(messageContent);
         const channel = message.channel;
         const members = channel.members;
         if (shouldMute(message.content)) {
@@ -177,7 +136,7 @@ client.on('message', (message) => {
             message.channel.send('Call Unmuted');
         }
     }
-});
+});*/
 //------------------------------
 // BULK DELETER
 //------------------------------
@@ -252,6 +211,70 @@ client.on("message", message =>{
                 }).then((member) => {
                     message.channel.send(`${member} is geband door <@${message.author.id}>. Wegens "${reason}"`);
                 });
+            }
+        }
+        else{
+            message.reply("Je hebt de benodigde rol niet.")
+            .then(msg => {
+                msg.delete({ timeout: 5000 })
+            }).catch(console.error);
+        }
+    }
+});
+//------------------------------
+//MUTE
+//------------------------------
+client.on("message", message =>{
+    if(message.content.startsWith("/mute")){
+        if(message.member.roles.cache.find(r => r.name === "Moderator")) {
+            const mutedRole = message.guild.roles.cache.find((role) => role.name === 'Muted');
+            const muted = message.mentions.members.first();
+            let arg = message.content.split(" ");
+            if(arg.length === 1){
+                message.channel.send("Selecteer iemand");
+            }
+            else{
+                if (muted.roles.cache.some(role => role.name === 'Muted')){
+                    message.channel.send(`${muted} is al gemuted.`);
+                }
+                else{
+                    if(arg.length === 2){
+                        muted.roles.add(mutedRole);
+                        message.channel.send(`${muted} is gemuted.`);
+                    }
+                    else{
+                        muted.roles.add(mutedRole)
+                        setTimeout(() => {
+                            muted.roles.remove(mutedRole);
+                            message.channel.send(`${muted} is unmuted.`);
+                        }, ms(arg[2]));
+                        message.channel.send(`${muted} is gemuted voor ${arg[2]}.`);
+                    }
+                }
+            }
+        }
+        else{
+            message.reply("Je hebt de benodigde rol niet.")
+            .then(msg => {
+                msg.delete({ timeout: 5000 })
+            }).catch(console.error);
+        }
+    }
+});
+//------------------------------
+//UNMUTE
+//------------------------------
+client.on("message", message =>{
+    if(message.content.startsWith("/unmute")){
+        if(message.member.roles.cache.find(r => r.name === "Moderator")) {
+            const mutedRole = message.guild.roles.cache.find((role) => role.name === 'Muted');
+            const muted = message.mentions.members.first();
+            if (!muted.roles.cache.some(role => role.name === 'Muted')){
+                message.channel.send(`${muted} was niet gemuted!`);
+            }
+            else{
+                muted.roles.remove(mutedRole);
+                message.channel.send(`${muted} is niet meer muted.`);
             }
         }
         else{
