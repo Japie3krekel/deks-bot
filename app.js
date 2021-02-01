@@ -271,4 +271,4 @@ client.on('ready', () => {
 //-------------------------------------
 // TOKEN
 //-------------------------------------
-client.login("ODA1NzYzMDgwNDI0MzkwNjY2.YBfnWA.a6spBxmEjUFV3Wa0RM4nGuJ3Vh4");
+client.login(process.env.token);
